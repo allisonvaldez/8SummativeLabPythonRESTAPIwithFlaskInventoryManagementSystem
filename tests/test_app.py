@@ -20,11 +20,13 @@ def reset_inventory():
         {"id": 3, "name": "Olive Oil",    "quantity": 30,  "price": 8.99, "barcode": ""},
     ])
 
+# Test homepage
 def test_homepage_returns_200(client):
     response = client.get("/")
     assert response.status_code == 200
     assert "message" in response.get_json()
 
+# Test inventory
 def test_get_all_inventory(client):
     response = client.get("/inventory")
     assert response.status_code == 200
@@ -32,6 +34,7 @@ def test_get_all_inventory(client):
     assert isinstance(data, list)
     assert len(data) == 3
 
+# Test get item
 def test_get_item_by_id(client):
     response = client.get("/inventory/1")
     assert response.status_code == 200
@@ -39,11 +42,13 @@ def test_get_item_by_id(client):
     assert data["id"] == 1
     assert data["name"] == "Apple Juice"
 
+# Test item not found
 def test_get_item_not_found(client):
     response = client.get("/inventory/999")
     assert response.status_code == 404
     assert "error" in response.get_json()
 
+# Test create item
 def test_create_item(client):
     payload  = {"name": "Orange Juice", "quantity": 25, "price": 3.49}
     response = client.post("/inventory", json=payload)
@@ -52,11 +57,13 @@ def test_create_item(client):
     assert data["name"] == "Orange Juice"
     assert "id" in data
 
+# Test missing fields
 def test_create_item_missing_fields(client):
     response = client.post("/inventory", json={"name": "Missing Fields"})
     assert response.status_code == 400
     assert "error" in response.get_json()
 
+# Test update item
 def test_update_item(client):
     response = client.patch("/inventory/1", json={"quantity": 75, "price": 3.49})
     assert response.status_code == 200
@@ -65,19 +72,23 @@ def test_update_item(client):
     assert data["price"] == 3.49
     assert data["name"] == "Apple Juice"
 
+# Test not found
 def test_update_item_not_found(client):
     response = client.patch("/inventory/999", json={"quantity": 10})
     assert response.status_code == 404
 
+# Test delete item
 def test_delete_item(client):
     response = client.delete("/inventory/1")
     assert response.status_code == 204
     assert client.get("/inventory/1").status_code == 404
 
+# Test item not found
 def test_delete_item_not_found(client):
     response = client.delete("/inventory/999")
     assert response.status_code == 404
 
+# Test search
 def test_search_items(client):
     response = client.get("/inventory/search/juice")
     assert response.status_code == 200
@@ -85,10 +96,12 @@ def test_search_items(client):
     assert len(data) >= 1
     assert all("juice" in item["name"].lower() for item in data)
 
+# Test not found
 def test_search_items_not_found(client):
     response = client.get("/inventory/search/xyz123notreal")
     assert response.status_code == 404
 
+# Test external
 def test_fetch_external_product_found(client):
     mock_response = MagicMock()
     mock_response.json.return_value = {
@@ -102,6 +115,7 @@ def test_fetch_external_product_found(client):
         assert data["name"] == "Test Juice"
         assert data["brand"] == "Test Brand"
 
+# Test external not found
 def test_fetch_external_product_not_found(client):
     mock_response = MagicMock()
     mock_response.json.return_value = {"status": 0}
@@ -110,6 +124,7 @@ def test_fetch_external_product_not_found(client):
         assert response.status_code == 404
         assert "error" in response.get_json()
 
+# Test external add
 def test_add_from_external(client):
     mock_response = MagicMock()
     mock_response.json.return_value = {
