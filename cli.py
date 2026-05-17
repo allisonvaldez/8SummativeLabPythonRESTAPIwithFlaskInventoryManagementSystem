@@ -64,9 +64,15 @@ def view_by_id():
 # Create function to add an item
 def add_item():
     print("\n\nAdd a new item:")
-    name     = input("Name: ").strip()
-    quantity = int(input("Quantity: ").strip())
-    price    = float(input("Price: $").strip())
+    name = input("Name: ").strip()
+    
+    try:
+        quantity = int(input("Quantity: ").strip())
+        price = float(input("Price: $").strip())
+    except ValueError:
+        print("❌ Error: Quantity must be a whole number and Price must be a valid number!")
+        return
+
     barcode  = input("Barcode (optional, press Enter to skip): ").strip()
     payload  = {"name": name, "quantity": quantity, "price": price, "barcode": barcode}
     response = requests.post(f"{base_url}/inventory", json=payload)
@@ -78,17 +84,23 @@ def add_item():
 
 # Create function to update an item
 def update_item():
-    
     item_id  = input("Enter item ID to update: ").strip()
     
     print("Enter a new item and it's value (press Enter to skip):")
     name     = input("New name: ").strip()
     quantity = input("New quantity: ").strip()
     price    = input("New price: $").strip()
+    
     payload  = {}
     if name:     payload["name"]     = name
-    if quantity: payload["quantity"] = int(quantity)
-    if price:    payload["price"]    = float(price)
+    
+    try:
+        if quantity: payload["quantity"] = int(quantity)
+        if price:    payload["price"]    = float(price)
+    except ValueError:
+        print("❌ Error: Quantity must be a whole number and Price must be a valid number!")
+        return
+
     response = requests.patch(f"{base_url}/inventory/{item_id}", json=payload)
     if response.status_code == 200:
         print("\n\nItem updated.")
@@ -98,9 +110,7 @@ def update_item():
 
 # Create function to delete an item
 def delete_item():
-    
     item_id = input("Enter item ID to delete: ").strip()
-    
     confirm = input(f"Are you sure you want to delete item {item_id}? (y/n): ").strip().lower()
     
     #Control flow
@@ -154,8 +164,14 @@ def fetch_external():
 # Create function to add an item from the API provided 
 def add_from_external():
     barcode  = input("Enter product's barcode: ").strip()
-    quantity = int(input("How many would you like to add: ").strip())
-    price    = float(input("Price: $").strip())
+    
+    try:
+        quantity = int(input("How many would you like to add: ").strip())
+        price    = float(input("Price: $").strip())
+    except ValueError:
+        print("❌ Error: Quantity must be a whole number and Price must be a valid number!")
+        return  # Safely goes back to the main menu instead of crashing
+        
     payload  = {"quantity": quantity, "price": price}
     response = requests.post(f"{base_url}/external/add/{barcode}", json=payload)
     
